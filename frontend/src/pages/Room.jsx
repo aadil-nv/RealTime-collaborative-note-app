@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -6,6 +5,8 @@ import { io } from "socket.io-client";
 import axiosInstance from "../api/axiosInstance";
 import CreateNote from "../components/CreateNote";
 import EditNote from "../components/EditNote";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const SOCKET_URL = "http://localhost:7000";
 
@@ -42,36 +43,41 @@ export default function Room() {
   }, [roomId, navigate]);
 
   // Socket setup
-  // Inside your useEffect for socket
-useEffect(() => {
-  if (!roomId || !userName) return;
+  useEffect(() => {
+    if (!roomId || !userName) return;
 
-  const s = io(SOCKET_URL);
-  setSocket(s);
+    const s = io(SOCKET_URL);
+    setSocket(s);
 
-  s.emit("joinRoom", { roomId, username: userName });
+    s.emit("joinRoom", { roomId, username: userName });
 
-  // Handle note creation
-  s.on("noteCreated", (newNote) => {
-    console.log("noteCreated", newNote);
-    // newNote is already the populated note, no .data.note
-    setNotes((prev) => [...prev, newNote]);
-  });
+    // Listen for other users joining
+    s.on("userJoined", ({ username }) => {
+      toast.info(`${username} joined the room`);
+    });
 
-  // Handle note update
-  s.on("noteUpdated", (updatedNote) => {
-    console.log("noteUpdated", updatedNote);
-    setNotes((prev) =>
-      prev.map((n) => (n._id === updatedNote._id ? updatedNote : n))
-    );
-  });
+    // Listen for other users leaving
+    s.on("userLeft", ({ username }) => {
+      toast.warn(`${username} left the room`);
+    });
 
-  return () => {
-    s.emit("leaveRoom", { roomId, username: userName });
-    s.disconnect();
-  };
-}, [roomId, userName]);
+    // Handle note creation
+    s.on("noteCreated", (newNote) => {
+      setNotes((prev) => [...prev, newNote]);
+    });
 
+    // Handle note update
+    s.on("noteUpdated", (updatedNote) => {
+      setNotes((prev) =>
+        prev.map((n) => (n._id === updatedNote._id ? updatedNote : n))
+      );
+    });
+
+    return () => {
+      s.emit("leaveRoom", { roomId, username: userName });
+      s.disconnect();
+    };
+  }, [roomId, userName]);
 
   if (!roomData) {
     return (
@@ -81,7 +87,6 @@ useEffect(() => {
     );
   }
 
-  // Format date nicely
   const formatDate = (dateStr) => {
     const d = new Date(dateStr);
     return d.toLocaleString();
@@ -89,6 +94,7 @@ useEffect(() => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
+      <ToastContainer position="top-right" autoClose={3000} />
       <header className="flex justify-between items-center p-4 bg-white shadow-md">
         <div>
           <h2 className="text-xl font-bold text-gray-800">

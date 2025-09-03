@@ -11,27 +11,27 @@ const initSocket = (server) => {
   io.on("connection", (socket) => {
     console.log("User connected:", socket.id);
 
-    socket.on("joinRoom", async ({ roomId, username }) => {
-      console.log("roomId", roomId);
+   socket.on("joinRoom", async ({ roomId, username }) => {
+  socket.join(roomId);
 
-      socket.join(roomId);
+  if (!activeUsers[roomId]) activeUsers[roomId] = new Set();
+  activeUsers[roomId].add(username);
 
-      if (!activeUsers[roomId]) activeUsers[roomId] = new Set();
-      activeUsers[roomId].add(username);
+  // Emit active users
+  io.to(roomId).emit("activeUsers", Array.from(activeUsers[roomId]));
 
-      io.to(roomId).emit(
-        "activeUsers",
-        Array.from(activeUsers[roomId]) // safe because we just initialized if undefined
-      );
-    });
+  // Notify others in the room
+  socket.to(roomId).emit("userJoined", { username });
+});
 
     socket.on("leaveRoom", async ({ roomId, username }) => {
-      socket.leave(roomId);
-      if (activeUsers[roomId]) {
-        activeUsers[roomId].delete(username);
-        io.to(roomId).emit("activeUsers", Array.from(activeUsers[roomId]));
-      }
-    });
+  socket.leave(roomId);
+  if (activeUsers[roomId]) {
+    activeUsers[roomId].delete(username);
+    io.to(roomId).emit("activeUsers", Array.from(activeUsers[roomId]));
+    socket.to(roomId).emit("userLeft", { username });
+  }
+});
 
     socket.on("updateNote", async ({ roomId, noteId, title, content, userId }) => {
   try {
@@ -117,17 +117,15 @@ const initSocket = (server) => {
 
 
     socket.on("disconnecting", () => {
-      // socket.rooms includes the socket's own ID, so filter it out
-      for (const roomId of socket.rooms) {
-        if (roomId === socket.id) continue;
-
-        if (activeUsers[roomId]) {
-          // Remove the username(s) associated with this socket
-          activeUsers[roomId].delete(socket.username); // optional: track username per socket
-          io.to(roomId).emit("activeUsers", Array.from(activeUsers[roomId]));
-        }
-      }
-    });
+  for (const roomId of socket.rooms) {
+    if (roomId === socket.id) continue;
+    if (activeUsers[roomId]) {
+      activeUsers[roomId].delete(socket.username);
+      io.to(roomId).emit("activeUsers", Array.from(activeUsers[roomId]));
+      socket.to(roomId).emit("userLeft", { username: socket.username });
+    }
+  }
+});
   });
 
   return io;
