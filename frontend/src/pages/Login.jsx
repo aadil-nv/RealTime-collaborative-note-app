@@ -18,7 +18,6 @@ export default function Login() {
 
       dispatch(setUser({ userId: data._id, name: data.username, email: data.email }));
 
-      // ✅ Redirect if login success
       if (data._id) {
         navigate("/user/home");
       }

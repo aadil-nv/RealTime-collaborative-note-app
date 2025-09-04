@@ -12,7 +12,6 @@ export default function Home() {
   const navigate = useNavigate();
   const user = useSelector((state) => state.user);
 
-  // Fetch all rooms on component mount
   useEffect(() => {
     const fetchRooms = async () => {
       try {
@@ -33,12 +32,11 @@ export default function Home() {
         adminId: user.userId,
       });
       
-      // Navigate with state containing userName and roomId
       navigate(`/user/room/${data.room._id}`, {
         state: {
-          userName: user.name || user.username, // Adjust based on your user object structure
+          userName: user.name || user.username, 
           roomId: data.room._id,
-          customRoomId: data.room.roomId // if you need the custom room ID too
+          customRoomId: data.room.roomId 
         }
       });
     } catch (err) {
@@ -47,12 +45,12 @@ export default function Home() {
   };
 
   const joinRoom = (room) => {
-    // Navigate with state containing userName and roomId
+ 
     navigate(`/user/room/${room._id}`, {
       state: {
-        userName: user.name || user.username, // Adjust based on your user object structure
+        userName: user.name || user.username, 
         roomId: room._id,
-        customRoomId: room.roomId // if you need the custom room ID too
+        customRoomId: room.roomId 
       }
     });
   };
@@ -63,7 +61,6 @@ export default function Home() {
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-100 p-4">
-      {/* Header */}
       <div className="w-full max-w-2xl flex justify-between items-center mb-6">
         <h2 className="text-3xl font-bold text-gray-800">Collaborative Notes</h2>
         <button
@@ -74,14 +71,12 @@ export default function Home() {
         </button>
       </div>
 
-      {/* User Info */}
       <div className="w-full max-w-2xl mb-4">
         <p className="text-gray-600">
           Welcome, <span className="font-semibold">{user.name || user.username}</span>
         </p>
       </div>
 
-      {/* Rooms List */}
       <div className="w-full max-w-2xl mb-6">
         <h4 className="text-lg font-semibold mb-2 text-gray-700">Available Rooms</h4>
         <div className="bg-white shadow rounded-md p-4">
@@ -103,7 +98,7 @@ export default function Home() {
                 <button 
                   className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition"
                   onClick={(e) => {
-                    e.stopPropagation(); // Prevent the div onClick from firing
+                    e.stopPropagation(); 
                     joinRoom(room);
                   }}
                 >
@@ -115,7 +110,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Create Room Section */}
       <div className="w-full max-w-2xl">
         <h4 className="text-lg font-semibold mb-2 text-gray-700">Create New Room</h4>
         <div className="flex gap-2">

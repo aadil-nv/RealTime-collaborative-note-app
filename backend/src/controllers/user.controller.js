@@ -1,6 +1,5 @@
 const User = require("../models/user.schema");
 
-// Get all users
 const getAllUsers = async (req, res, next) => {
   try {
     const users = await User.find();
@@ -10,7 +9,6 @@ const getAllUsers = async (req, res, next) => {
   }
 };
 
-// Create user
 const createUser = async (req, res, next) => {
   try {
     console.log("calling createUser",req.body);

@@ -6,7 +6,7 @@ const noteSchema = new mongoose.Schema({
   collaborators: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // Make sure your User model is named "User"
+      ref: "User", 
     },
   ],
   updatedAt: { type: Date, default: Date.now },

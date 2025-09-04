@@ -8,7 +8,6 @@ import EditNote from "../components/EditNote";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const SOCKET_URL = "http://localhost:7000";
 
 export default function Room() {
   const [socket, setSocket] = useState(null);
@@ -42,31 +41,26 @@ export default function Room() {
     if (roomId) fetchRoom();
   }, [roomId, navigate]);
 
-  // Socket setup
   useEffect(() => {
     if (!roomId || !userName) return;
 
-    const s = io(SOCKET_URL);
+    const s = io(import.meta.env.VITE_SOCKET_URL);
     setSocket(s);
 
     s.emit("joinRoom", { roomId, username: userName });
 
-    // Listen for other users joining
     s.on("userJoined", ({ username }) => {
       toast.info(`${username} joined the room`);
     });
 
-    // Listen for other users leaving
     s.on("userLeft", ({ username }) => {
       toast.warn(`${username} left the room`);
     });
 
-    // Handle note creation
     s.on("noteCreated", (newNote) => {
       setNotes((prev) => [...prev, newNote]);
     });
 
-    // Handle note update
     s.on("noteUpdated", (updatedNote) => {
       setNotes((prev) =>
         prev.map((n) => (n._id === updatedNote._id ? updatedNote : n))

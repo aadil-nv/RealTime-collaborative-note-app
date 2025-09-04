@@ -12,7 +12,6 @@ export default function CreateNote({ roomId, username, onClose, socket }) {
 
     setLoading(true);
 
-    // Emit the createNote event
     socket.emit("createNote", { roomId, title, content, username });
 
     setTitle("");

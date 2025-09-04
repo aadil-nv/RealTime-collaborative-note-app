@@ -12,7 +12,6 @@ export default function EditNote({ note, roomId, username, socket, onClose }) {
     if (!socket) return alert("Socket not connected");
     try {
       setLoading(true);
-      // Emit the updateNote event via socket
       socket.emit("updateNote", { roomId, noteId: note._id, title, content, username,userId:user.userId });
       onClose();
     } catch (err) {

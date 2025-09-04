@@ -1,7 +1,6 @@
 const NoteRoom = require("../models/noteRoom.schema");
-const User = require("../models/user.schema"); // Make sure you have a User model
+const User = require("../models/user.schema"); 
 
-// Create Note Room
 exports.createRoom = async (req, res, next) => {
   try {
     const { roomId, adminId } = req.body;
@@ -14,12 +13,11 @@ exports.createRoom = async (req, res, next) => {
   }
 };
 
-// Get Note Room
 exports.getRoom = async (req, res, next) => {
   try {
     const { roomId } = req.params;
     const room = await NoteRoom.findOne({ _id: roomId })
-      .populate("notes.collaborators", "username email"); // populate user details
+      .populate("notes.collaborators", "username email");
     if (!room) return res.status(404).json({ message: "Room not found" });
     res.json({ room });
   } catch (err) {
@@ -27,11 +25,10 @@ exports.getRoom = async (req, res, next) => {
   }
 };
 
-// Add Note
 exports.addNote = async (req, res, next) => {
   try {
     const { roomId } = req.params;
-    const { title, content, userId } = req.body; // pass userId instead of username
+    const { title, content, userId } = req.body; 
 
     const room = await NoteRoom.findOne({ _id: roomId });
     if (!room) return res.status(404).json({ message: "Room not found" });
@@ -40,7 +37,6 @@ exports.addNote = async (req, res, next) => {
     room.notes.push(note);
     await room.save();
 
-    // Populate collaborators before sending response
     const savedNote = room.notes[room.notes.length - 1];
     await savedNote.populate("collaborators", "username email");
 
@@ -50,11 +46,10 @@ exports.addNote = async (req, res, next) => {
   }
 };
 
-// Update Note
 exports.updateNote = async (req, res, next) => {
   try {
     const { roomId, noteId } = req.params;
-    const { title, content, userId } = req.body; // pass userId
+    const { title, content, userId } = req.body; 
 
     const room = await NoteRoom.findOne({ _id: roomId });
     if (!room) return res.status(404).json({ message: "Room not found" });
@@ -65,7 +60,6 @@ exports.updateNote = async (req, res, next) => {
     note.title = title || note.title;
     note.content = content || note.content;
 
-    // Add user to collaborators if not already there
     if (!note.collaborators.includes(userId) && room.adminId.toString() !== userId) {
       note.collaborators.push(userId);
     }
@@ -73,7 +67,7 @@ exports.updateNote = async (req, res, next) => {
     note.updatedAt = new Date();
     await room.save();
 
-    await note.populate("collaborators", "username email"); // populate before sending
+    await note.populate("collaborators", "username email"); 
 
     res.json({ note });
   } catch (err) {
@@ -81,7 +75,6 @@ exports.updateNote = async (req, res, next) => {
   }
 };
 
-// Remove Collaborator
 exports.removeCollaborator = async (req, res, next) => {
   try {
     const { roomId, noteId } = req.params;
@@ -104,11 +97,10 @@ exports.removeCollaborator = async (req, res, next) => {
   }
 };
 
-// Get All Rooms
 exports.getAllRooms = async (req, res, next) => {
   try {
     const rooms = await NoteRoom.find({}, { roomId: 1, adminId: 1, notes: 1 })
-      .populate("notes.collaborators", "username email"); // populate collaborators in all notes
+      .populate("notes.collaborators", "username email"); 
     res.json({ rooms });
   } catch (err) {
     next(err);
