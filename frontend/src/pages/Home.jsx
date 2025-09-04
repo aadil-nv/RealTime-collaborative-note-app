@@ -92,7 +92,7 @@ export default function Home() {
                 <div>
                   <p className="font-semibold">{room.roomId}</p>
                   <p className="text-sm text-gray-500">
-                    Active Users: {room.activeUsers?.length || 0}
+                    Notes: {room.notes?.length || 0}
                   </p>
                 </div>
                 <button 
