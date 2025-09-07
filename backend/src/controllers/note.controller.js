@@ -100,7 +100,7 @@ exports.removeCollaborator = async (req, res, next) => {
 exports.getAllRooms = async (req, res, next) => {
   try {
     const rooms = await NoteRoom.find({}, { roomId: 1, adminId: 1, notes: 1 })
-      .populate("notes.collaborators", "username email"); 
+      .populate("notes.collaborators", "username email").sort({ _id: -1 });
     res.json({ rooms });
   } catch (err) {
     next(err);
